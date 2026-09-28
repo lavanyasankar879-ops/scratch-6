@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remember the Day</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            /* Rich pink luxury background with soft floral/bokeh-like ambient gradient styling */
+            background: radial-gradient(circle at center, #ffeef2 0%, #ffb6c1 50%, #e06d86 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Ambient floating cherry blossom / floral background effects */
+        body::before {
+            content: "🌸";
+            position: absolute;
+            font-size: 5rem;
+            opacity: 0.15;
+            top: 10%;
+            left: 5%;
+        }
+        body::after {
+            content: "🌸";
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.15;
+            bottom: 10%;
+            right: 5%;
+        }
+
+        .header-title {
+            font-size: 2.4rem;
+            color: #ffffff;
+            margin-bottom: 25px;
+            font-weight: bold;
+            font-style: italic;
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 10px rgba(128, 24, 56, 0.4);
+        }
+
+        .card-container {
+            position: relative;
+            width: 330px;
+            height: 480px; /* Tall mobile aspect ratio layout */
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(128, 24, 56, 0.25);
+            overflow: hidden;
+            border: 3px solid #fff3f5;
+        }
+
+        /* Inside content revealed after scratching */
+        .card-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 45px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff5f7 0%, #ffe3e8 100%);
+        }
+
+        .top-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-style: italic;
+            color: #801838;
+            letter-spacing: 0.5px;
+        }
+
+        /* Premium 3D-Style Metallic Gold Date Card */
+        .date-box-3d {
+            width: 220px;
+            height: 160px;
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f3 100%);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            
+            /* Layered shadow arrangement to construct the 3D popping depth effect */
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: 
+                0 1px 0 #d4af37,
+                0 2px 0 #caa02e,
+                0 3px 0 #bd9224,
+                0 4px 0 #b0841b,
+                0 5px 0 #a27613,
+                0 10px 25px rgba(128, 24, 56, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* Wedding ring decorative icon embellishment nested inside the 3D frame */
+        .ring-icon {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+
+        .big-day {
+            font-size: 3.8rem;
+            font-weight: bold;
+            color: #801838;
+            line-height: 1;
+            text-shadow: 1px 2px 3px rgba(0,0,0,0.1);
+        }
+
+        .month-year {
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #caa02e; /* Classic metallic tint */
+            margin-top: 6px;
+        }
+
+        .bottom-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #a04060;
+        }
+
+        /* Interactive scratch canvas element mapping layer overlay */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            z-index: 10;
+            touch-action: none; /* Disables universal system scrolling triggers for optimized mobile dragging mechanics */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Upper Section Header Title -->
+    <h1 class="header-title">Scratch me</h1>
+
+    <!-- Core Interactive Scratch Card Architecture -->
+    <div class="card-container" id="cardBox">
+        
+        <!-- Inner content revealed during execution -->
+        <div class="card-content">
+            <div class="top-text">Remember the Day</div>
+            
+            <!-- 3D Date Box Element Core Configuration -->
+            <div class="date-box-3d">
+                <div class="ring-icon">💍</div>
+                <div class="big-day">12</div>
+                <div class="month-year">October 2026</div>
+            </div>
+            
+            <div class="bottom-text">📅 Monday</div>
+        </div>
+
+        <!-- Upper Canvas Layer: Champagne-Gold Foil Overlay Mask -->
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('cardBox');
+        let isDrawing = false;
+
+        function initScratchCard() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            // Generate an elegant champagne-gold metallic linear gradient layout
+            const goldGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            goldGrad.addColorStop(0, '#e5c158');   // Bright champagne highlight
+            goldGrad.addColorStop(0.2, '#f3db8b'); // Soft reflection
+            goldGrad.addColorStop(0.5, '#d4af37'); // Classic gold base
+            goldGrad.addColorStop(0.8, '#f3db8b'); // Shimmer accent
+            goldGrad.addColorStop(1, '#b5942b');   // Deep gold shadows
+            
+            ctx.fillStyle = goldGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Subtle textured golden glitter dust particle simulation overlay
+            for (let i = 0; i < 350; i++) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1.5, 1.5);
+            }
+
+            // Decorative gold border frames printed on top of the foil coating cover sheet
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+
+            // Instructions label layout typography execution logic block
+            ctx.font = "italic bold 18px Georgia";
+            ctx.fillStyle = "#684c0c"; // Deep bronze contrast shadow
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("✨ Scratch with Love ✨", canvas.width / 2, canvas.height / 2);
+            
+            // Set operational blend status context mode to clear matching pixels when brushed
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+
+        // Consolidated drawing execution script block handling calculations flawlessly
+        function scratch(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            // Supports touch interface arrays concurrently alongside standard point arrays 
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.lineWidth = 45; // Broad responsive erasing brush parameters
+            ctx.lineCap = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        // Web Desktop Event Interfaces
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); scratch(e); });
+        canvas.addEventListener('mousemove', scratch);
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        // Mobile Handset High-Precision Touch Interface Mapping
+        canvas.addEventListener('touchstart', (e) => { 
+            isDrawing = true; 
+            ctx.beginPath(); 
+            scratch(e); 
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            // Stops ambient mobile scrolling gestures during canvas scratching manipulation
+            e.preventDefault(); 
+            scratch(e);
+        });
+        window.addEventListener('touchend', () => { isDrawing = false; });
+
+        // Compile layout profiles seamlessly upon window execution trigger cycles
+        window.onload = initScratchCard;
+    </script>
+</body>
+</html>
